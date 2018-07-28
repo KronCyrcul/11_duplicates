@@ -1,6 +1,6 @@
 import os
 import sys
-from stat import *
+from stat import S_ISDIR, S_ISREG
 
 
 def get_all_files(path, all_files_dict):
@@ -18,10 +18,17 @@ def get_all_files(path, all_files_dict):
 
 
 def check_duplicates(all_files_dict):
-    duplictes = [path for (path, file_info) in all_files_dict.items()
+    duplicates = [path for (path, file_info) in all_files_dict.items()
         if list(all_files_dict.values()).count(file_info) >= 2]
-    return duplictes
+    if not bool(duplicates):
+        sys.exit("Дубликаты не найдены")
+    return duplicates
 
+
+def print_duplicates(duplicates):
+    for duplicate in duplicates:
+        print("Файл по адресу {} имеет дубликат"
+            " в проверяемой папке".format(duplicate))
 
 if __name__ == "__main__":
     try:
@@ -30,11 +37,7 @@ if __name__ == "__main__":
         if os.path.isdir(main_path):
             get_all_files(main_path, all_files_dict)
             duplicates = check_duplicates(all_files_dict)
-            if len(duplicates) == 0:
-                sys.exit("Дубликаты не найдены")
-            for duplicate in duplicates:
-                print("Файл по адресу {} имеет дубликат"
-                    " в проверяемой папке".format(duplicate))
+            print_duplicates(duplicates)
         else:
             sys.exit("Неверный путь до папки")
     except IndexError:
