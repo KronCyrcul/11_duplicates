@@ -30,6 +30,8 @@ if __name__ == "__main__":
         if os.path.isdir(main_path):
             get_all_files(main_path, all_files_dict)
             duplicates = check_duplicates(all_files_dict)
+            if len(duplicates) == 0:
+                sys.exit("Дубликаты не найдены")
             for duplicate in duplicates:
                 print("Файл по адресу {} имеет дубликат"
                     " в проверяемой папке".format(duplicate))
