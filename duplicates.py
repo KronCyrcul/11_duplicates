@@ -20,15 +20,16 @@ def get_all_files(path, all_files_dict):
 def check_duplicates(all_files_dict):
     duplicates = [path for (path, file_info) in all_files_dict.items()
         if list(all_files_dict.values()).count(file_info) >= 2]
-    if not bool(duplicates):
-        sys.exit("Дубликаты не найдены")
     return duplicates
 
 
 def print_duplicates(duplicates):
-    for duplicate in duplicates:
-        print("Файл по адресу {} имеет дубликат"
-            " в проверяемой папке".format(duplicate))
+    if not bool(duplicates):
+        print("Дубликаты не найдены")
+    else:
+        for duplicate in duplicates:
+            print("Файл по адресу {} имеет дубликат"
+                " в проверяемой папке".format(duplicate))
 
 if __name__ == "__main__":
     try:
