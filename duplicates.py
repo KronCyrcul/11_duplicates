@@ -1,25 +1,20 @@
 import os
 import sys
-from stat import S_ISDIR, S_ISREG
 
 
 def get_all_files(path, all_files_dict):
-    dir_files = os.listdir(path)
-    for file in dir_files:
-        file_path = os.path.join(path, file)
-        file_stats = os.stat(file_path)
-        if S_ISDIR(file_stats.st_mode):
-            get_all_files(file_path, all_files_dict)
-        elif S_ISREG(file_stats.st_mode):
-            all_files_dict[file_path] = [file, file_stats.st_size]
-        else:
-            pass
+    for current_path, folders_name, files_name in os.walk(path):
+        for file_name in files_name:
+            file_path = os.path.join(current_path, file_name)
+            file_size = os.stat(file_path).st_size
+            all_files_dict.setdefault((file_name, file_size), []).append(
+                os.path.join(current_path, file_name))
     return all_files_dict
 
 
 def check_duplicates(all_files_dict):
-    duplicates = [path for (path, file_info) in all_files_dict.items()
-        if list(all_files_dict.values()).count(file_info) >= 2]
+    duplicates = [duplicate_path for (duplicate_info, duplicate_path)
+        in all_files_dict.items() if len(duplicate_path) >= 2]
     return duplicates
 
 
@@ -27,19 +22,20 @@ def print_duplicates(duplicates):
     if not bool(duplicates):
         print("Дубликаты не найдены")
     else:
-        for duplicate in duplicates:
-            print("Файл по адресу {} имеет дубликат"
-                " в проверяемой папке".format(duplicate))
+        for duplicate_path_list in duplicates:
+            print("Файлы по адресам {} являются дубликатами".format(
+                ", ".join(duplicate_path_list)))
+
 
 if __name__ == "__main__":
     try:
         main_path = sys.argv[1]
-        all_files_dict = {}
-        if os.path.isdir(main_path):
-            get_all_files(main_path, all_files_dict)
-            duplicates = check_duplicates(all_files_dict)
-            print_duplicates(duplicates)
-        else:
-            sys.exit("Неверный путь до папки")
     except IndexError:
         sys.exit("Путь не найден")
+    all_files_dict = {}
+    if os.path.isdir(main_path):
+        get_all_files(main_path, all_files_dict)
+        duplicates = check_duplicates(all_files_dict)
+        print_duplicates(duplicates)
+    else:
+        sys.exit("Неверный путь до папки")
